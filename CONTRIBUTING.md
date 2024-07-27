@@ -40,6 +40,7 @@ the repo to catch any issues locally.
 ## Style Guide
 
 - Run `cargo clippy --all` - this will catch common mistakes and improve your Rust code
+- Run `cargo clippy --fix`
 - Run `cargo fmt` - this will find and fix code formatting issues.
 
 ## Testing and Benchmarking

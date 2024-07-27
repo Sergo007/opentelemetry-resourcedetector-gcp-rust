@@ -19,7 +19,7 @@ impl TestEnvs {
 
     pub fn get_env(key: &str) -> Option<String> {
         let key = Self::make_key(key);
-        std::env::var(key).map_or_else(|_| None, |v| Some(v))
+        std::env::var(key).map_or_else(|_| None, Some)
     }
 
     pub fn set_var(key: &str, value: &str) {
@@ -55,7 +55,7 @@ impl TestEnvs {
     }
     fn restore_envs(&self) {
         for pair in &self.envs {
-            Self::set_env(&pair);
+            Self::set_env(pair);
         }
     }
 

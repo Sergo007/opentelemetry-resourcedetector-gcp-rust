@@ -59,12 +59,12 @@ async fn get_metadata() ->  Result<serde_json::Value, OpenTelemetryError> {
 
 
 fn get_metadata_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, OpenTelemetryError> {
-     let project_id = if let Some(serde_json::Value::String(project_id)) = get_val::get_val(&metadata, &["project", "projectId"], None) {
+     let project_id = if let Some(serde_json::Value::String(project_id)) = get_val::get_val(metadata, &["project", "projectId"], None) {
         project_id
      } else {
         Err(OpenTelemetryError::new("project id not found"))?
      };
-     let zone = if let Some(serde_json::Value::String(zone)) = get_val::get_val(&metadata, &["instance", "zone"], None) {
+     let zone = if let Some(serde_json::Value::String(zone)) = get_val::get_val(metadata, &["instance", "zone"], None) {
         zone
      } else {
         Err(OpenTelemetryError::new("zone not found"))?
@@ -83,22 +83,22 @@ fn get_metadata_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>,
 fn get_gce_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, OpenTelemetryError> {
 
     let mut attrs = get_metadata_resources(metadata)?;
-    let host_id = if let Some(serde_json::Value::String(host_id)) = get_val::get_val(&metadata, &["instance", "id"], None) {
+    let host_id = if let Some(serde_json::Value::String(host_id)) = get_val::get_val(metadata, &["instance", "id"], None) {
         host_id.clone()
     } else {
         Err(OpenTelemetryError::new("host id not found"))?
     };
-    let machine_type = if let Some(serde_json::Value::String(machine_type)) = get_val::get_val(&metadata, &["instance", "machineType"], None) {
+    let machine_type = if let Some(serde_json::Value::String(machine_type)) = get_val::get_val(metadata, &["instance", "machineType"], None) {
         machine_type.clone()
     } else {
         Err(OpenTelemetryError::new("not gce resources"))?
     };
-    let zone_and_region = if let Some(serde_json::Value::String(zone_and_region)) = get_val::get_val(&metadata, &["instance", "zone"], None) {
+    let zone_and_region = if let Some(serde_json::Value::String(zone_and_region)) = get_val::get_val(metadata, &["instance", "zone"], None) {
         parse_zone(zone_and_region)
     } else {
         Err(OpenTelemetryError::new("not gce resources"))?
     };
-    let host_name = if let Some(serde_json::Value::String(host_name)) = get_val::get_val(&metadata, &["instance", "name"], None) {
+    let host_name = if let Some(serde_json::Value::String(host_name)) = get_val::get_val(metadata, &["instance", "name"], None) {
         host_name.clone()
     } else {
         Err(OpenTelemetryError::new("not gce resources"))?
@@ -157,15 +157,15 @@ fn get_gke_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, Open
     };
     attrs.push(KeyValue::new("k8s.pod.name", pod_name.clone()));
 
-    let cluster_name = if let Some(serde_json::Value::String(cluster_name)) = get_val::get_val(&metadata, &["instance", "attributes", "cluster-name"], None) {
+    let cluster_name = if let Some(serde_json::Value::String(cluster_name)) = get_val::get_val(metadata, &["instance", "attributes", "cluster-name"], None) {
         cluster_name
     } else {
         Err(OpenTelemetryError::new("cluster name not found"))?
     };
     attrs.push(KeyValue::new("k8s.cluster.name", cluster_name.clone()));
 
-    if let Some(serde_json::Value::String(cluster_location)) = get_val::get_val(&metadata, &["instance", "attributes", "cluster-location"], None) {
-        let hyphen_count = cluster_location.split("-").count();
+    if let Some(serde_json::Value::String(cluster_location)) = get_val::get_val(metadata, &["instance", "attributes", "cluster-location"], None) {
+        let hyphen_count = cluster_location.split('-').count();
         if hyphen_count == 2 {
             attrs.push(KeyValue::new("cloud.region", cluster_location.clone()));
         }
@@ -174,8 +174,8 @@ fn get_gke_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, Open
         }
     }
 
-    if let Some(serde_json::Value::String(zone)) = get_val::get_val(&metadata, &["instance", "zone"], None) {
-        let zone = zone.split("/").last();
+    if let Some(serde_json::Value::String(zone)) = get_val::get_val(metadata, &["instance", "zone"], None) {
+        let zone = zone.split('/').last();
         if let Some(r) = zone {
             attrs.push(KeyValue::new("cloud.zone", r.to_string()));
         } else {
@@ -185,7 +185,7 @@ fn get_gke_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, Open
         Err(OpenTelemetryError::new("zone not found"))?
     };
 
-    let host_id = if let Some(serde_json::Value::String(host_id)) = get_val::get_val(&metadata, &["instance", "id"], None) {
+    let host_id = if let Some(serde_json::Value::String(host_id)) = get_val::get_val(metadata, &["instance", "id"], None) {
         host_id
     } else {
         Err(OpenTelemetryError::new("host id not found"))?
@@ -215,8 +215,8 @@ fn get_cloudrun_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>,
         attrs.push(KeyValue::new("faas.version", faas_version.clone()));
     }
 
-    if let Some(serde_json::Value::String(region)) = get_val::get_val(&metadata, &["instance", "region"], None) {
-        let region = region.split("/").last();
+    if let Some(serde_json::Value::String(region)) = get_val::get_val(metadata, &["instance", "region"], None) {
+        let region = region.split('/').last();
         if let Some(r) = region {
             attrs.push(KeyValue::new("cloud.region", r.to_string()));
         } else {
@@ -226,8 +226,8 @@ fn get_cloudrun_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>,
         Err(OpenTelemetryError::new("region not found"))?
     };
 
-    if let Some(serde_json::Value::String(zone)) = get_val::get_val(&metadata, &["instance", "zone"], None) {
-        let zone = zone.split("/").last();
+    if let Some(serde_json::Value::String(zone)) = get_val::get_val(metadata, &["instance", "zone"], None) {
+        let zone = zone.split('/').last();
         if let Some(r) = zone {
             attrs.push(KeyValue::new("cloud.zone", r.to_string()));
         } else {
@@ -237,7 +237,7 @@ fn get_cloudrun_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>,
         Err(OpenTelemetryError::new("zone not found"))?
     };
 
-    let instance_id = if let Some(serde_json::Value::String(instance_id)) = get_val::get_val(&metadata, &["instance", "id"], None) {
+    let instance_id = if let Some(serde_json::Value::String(instance_id)) = get_val::get_val(metadata, &["instance", "id"], None) {
         instance_id
     } else {
         Err(OpenTelemetryError::new("instance id not found"))?
@@ -265,8 +265,8 @@ fn get_cloudfunctions_resources(metadata: &serde_json::Value) -> Result<Vec<KeyV
         attrs.push(KeyValue::new("faas.version", faas_version.clone()));
     };
 
-    if let Some(serde_json::Value::String(region)) = get_val::get_val(&metadata, &["instance", "region"], None) {
-        let region = region.split("/").last();
+    if let Some(serde_json::Value::String(region)) = get_val::get_val(metadata, &["instance", "region"], None) {
+        let region = region.split('/').last();
         if let Some(r) = region {
             attrs.push(KeyValue::new("cloud.region", r.to_string()));
         } else {
@@ -276,8 +276,8 @@ fn get_cloudfunctions_resources(metadata: &serde_json::Value) -> Result<Vec<KeyV
         Err(OpenTelemetryError::new("region not found"))?
     };
 
-    if let Some(serde_json::Value::String(zone)) = get_val::get_val(&metadata, &["instance", "zone"], None) {
-        let zone = zone.split("/").last();
+    if let Some(serde_json::Value::String(zone)) = get_val::get_val(metadata, &["instance", "zone"], None) {
+        let zone = zone.split('/').last();
         if let Some(r) = zone {
             attrs.push(KeyValue::new("cloud.zone", r.to_string()));
         } else {
@@ -287,7 +287,7 @@ fn get_cloudfunctions_resources(metadata: &serde_json::Value) -> Result<Vec<KeyV
         Err(OpenTelemetryError::new("zone not found"))?
     };
 
-    let instance_id = if let Some(serde_json::Value::String(instance_id)) = get_val::get_val(&metadata, &["instance", "id"], None) {
+    let instance_id = if let Some(serde_json::Value::String(instance_id)) = get_val::get_val(metadata, &["instance", "id"], None) {
         instance_id
     } else {
         Err(OpenTelemetryError::new("instance id not found"))?

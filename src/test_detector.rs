@@ -392,7 +392,7 @@ mod gke_tests {
         let dir_path = Path::new("/var/run/secrets/kubernetes.io/serviceaccount");
         let file_path = dir_path.join("namespace");
 
-        fs::create_dir_all(&dir_path).unwrap();
+        fs::create_dir_all(dir_path).unwrap();
     
         // Create and write to the file
         let mut file = fs::File::create(file_path).unwrap();
