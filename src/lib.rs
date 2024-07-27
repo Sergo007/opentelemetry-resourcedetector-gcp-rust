@@ -37,10 +37,10 @@ fn parse_zone(text: &str) -> Zone {
 
         }
     }
-    return Zone {
+    Zone {
         region: "".to_string(),
         zone: "".to_string(),
-    };
+    }
 }
 
 async fn get_metadata() ->  Result<serde_json::Value, OpenTelemetryError> {
@@ -54,7 +54,7 @@ async fn get_metadata() ->  Result<serde_json::Value, OpenTelemetryError> {
 
     let response = request.send().await.map_err(OpenTelemetryError::new)?;
     let body = response.json::<serde_json::Value>().await.map_err(OpenTelemetryError::new)?;
-    return Ok(body);
+    Ok(body)
 }
 
 

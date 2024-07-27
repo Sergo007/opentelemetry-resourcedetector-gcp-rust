@@ -12,7 +12,7 @@ use serde_json::Value;
 ///     ]
 /// });
 /// let resp = get_val(&obj, &["foo", "0", "bar"], None);
-/// assert_eq!(Some(&serde_json::Value::String("bazz".to_string())), resp);
+/// assert_eq!(resp, Some(&serde_json::Value::String("bazz".to_string())));
 /// ```
 pub fn get_val<'a>(
     data: &'a Value,

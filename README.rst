@@ -9,7 +9,7 @@ Installation
 
 .. code:: bash
 
-    cargo add opentelemetry-resourcedetector-gcp-rust
+    cargo add opentelemetry_resourcedetector_gcp_rust
 
 ..
     TODO: Add usage info here
