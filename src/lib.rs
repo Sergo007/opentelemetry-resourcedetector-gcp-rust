@@ -4,6 +4,8 @@ pub mod get_val;
 mod test_envs;
 #[cfg(test)]
 mod test_detector;
+#[cfg(test)]
+mod test_mapping;
 
 use core::str;
 use std::{env, fs::File, io::Read, sync::Arc, time::Duration};
@@ -15,6 +17,7 @@ use regex::Regex;
 use serde::de::value::Error;
 use tracing::{info, warn};
 pub mod error;
+pub mod mapping;
 
 struct Zone {
     region: String,
