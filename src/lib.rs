@@ -18,6 +18,7 @@ use serde::de::value::Error;
 use tracing::{info, warn};
 pub mod error;
 pub mod mapping;
+pub mod constants;
 
 struct Zone {
     region: String,

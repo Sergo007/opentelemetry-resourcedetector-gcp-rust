@@ -6,6 +6,7 @@ mod tests {
     use opentelemetry::{KeyValue, StringValue};
     use opentelemetry_sdk::export;
     use serde_json::json;
+    use pretty_assertions_sorted::assert_eq_sorted;
 
     use crate::mapping::{get_monitored_resource, MonitoredResourceData};
 
@@ -37,6 +38,7 @@ mod tests {
                 "pod_name": "mypod",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
     
     #[test]
@@ -61,6 +63,7 @@ mod tests {
                 "pod_name": "mypod",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
     
 
@@ -84,6 +87,7 @@ mod tests {
                 "pod_name": "mypod",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -106,6 +110,7 @@ mod tests {
                 "pod_name": "mypod",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -127,6 +132,7 @@ mod tests {
                 "node_name": "mynode",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -148,6 +154,7 @@ mod tests {
                 "node_name": "mynode",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -167,6 +174,7 @@ mod tests {
                 "location": "myavailzone",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -186,6 +194,7 @@ mod tests {
                 "location": "myregion",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -206,6 +215,7 @@ mod tests {
                 "region": "myavailzone",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -226,6 +236,7 @@ mod tests {
                 "region": "myregion",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -247,6 +258,7 @@ mod tests {
                 "task_id": "serviceinstanceid",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -268,6 +280,7 @@ mod tests {
                 "task_id": "serviceinstanceid",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -288,6 +301,7 @@ mod tests {
                 "task_id": "serviceinstanceid",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -310,6 +324,7 @@ mod tests {
                 "task_id": "faasinstance",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -331,6 +346,7 @@ mod tests {
                 "task_id": "faasinstance",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -351,6 +367,7 @@ mod tests {
                 "node_id": "hostid",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -371,6 +388,7 @@ mod tests {
                 "node_id": "hostid",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -390,6 +408,7 @@ mod tests {
                 "node_id": "hostid",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -397,7 +416,7 @@ mod tests {
         let res = Resource::new(vec![
             KeyValue::new("service.namespace", "servicens"),
             KeyValue::new("service.name", "servicename"),
-            KeyValue::new("host.id", "hostid"),
+            KeyValue::new("host.name", "hostname"),
         ]);
         let monitored_resource = get_monitored_resource(res);
         assert!(monitored_resource.is_some());
@@ -409,6 +428,7 @@ mod tests {
                 "node_id": "hostname",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -427,6 +447,7 @@ mod tests {
                 "node_id": "",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
@@ -442,6 +463,7 @@ mod tests {
                 "node_id": "",
             })),
         };
+        assert_eq_sorted!(monitored_resource.unwrap(), export_monitored_resource);
     }
 
     #[test]
