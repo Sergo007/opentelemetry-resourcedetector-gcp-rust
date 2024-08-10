@@ -245,19 +245,19 @@ fn create_monitored_resource(
         }
 
         let mr_value = match mr_value {
-            Some(v) => v,
-            None => &opentelemetry::Value::String(map_config.fallback.into()),
+            Some(v) => v.clone(),
+            None => opentelemetry::Value::String(map_config.fallback.into()),
         };
 
 
         // OTel attribute values can be any of str, bool, int, float, or Sequence of any of
         // them. Encode any non-strings as json string
-        let mr_value = match mr_value {
+        let mr_value_str: String = match mr_value {
             opentelemetry::Value::String(s) => s.to_string(),
             _ => format!("{}", mr_value),
         };
 
-        labels.insert(mr_key.to_string(), mr_value);
+        labels.insert(mr_key.to_string(), mr_value_str);
     }
 
     MonitoredResourceData {
