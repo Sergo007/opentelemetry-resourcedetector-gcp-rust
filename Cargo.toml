@@ -1,6 +1,6 @@
 [package]
 name = "opentelemetry_resourcedetector_gcp_rust"
-version = "0.7.0"
+version = "0.8.0"
 description = "This library provides support for detecting GCP resources like GCE, GKE, etc."
 homepage = "https://github.com/Sergo007/opentelemetry-resourcedetector-gcp-rust"
 repository = "https://github.com/Sergo007/opentelemetry-resourcedetector-gcp-rust"
