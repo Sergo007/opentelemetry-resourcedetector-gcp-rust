@@ -1,9 +1,9 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 pub mod get_val;
 #[cfg(test)]
-mod test_envs;
-#[cfg(test)]
 mod test_detector;
+#[cfg(test)]
+mod test_envs;
 #[cfg(test)]
 mod test_mapping;
 
@@ -16,9 +16,9 @@ use opentelemetry_sdk::{resource::ResourceDetector, Resource};
 use regex::Regex;
 use serde::de::value::Error;
 use tracing::{info, warn};
+pub mod constants;
 pub mod error;
 pub mod mapping;
-pub mod constants;
 
 struct Zone {
     region: String,
@@ -38,7 +38,6 @@ fn parse_zone(text: &str) -> Zone {
                     zone: zone.as_str().to_string(),
                 };
             }
-
         }
     }
     Zone {
@@ -47,13 +46,14 @@ fn parse_zone(text: &str) -> Zone {
     }
 }
 
-async fn get_metadata() ->  Result<serde_json::Value, OpenTelemetryError> {
+async fn get_metadata() -> Result<serde_json::Value, OpenTelemetryError> {
     let client = reqwest::Client::builder().build().map_err(OpenTelemetryError::new)?;
 
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert("Metadata-Flavor", "Google".parse().unwrap());
 
-    let request = client.request(reqwest::Method::GET, "http://metadata.google.internal/computeMetadata/v1/?recursive=true")
+    let request = client
+        .request(reqwest::Method::GET, "http://metadata.google.internal/computeMetadata/v1/?recursive=true")
         .headers(headers);
 
     let response = request.send().await.map_err(OpenTelemetryError::new)?;
@@ -61,31 +61,25 @@ async fn get_metadata() ->  Result<serde_json::Value, OpenTelemetryError> {
     Ok(body)
 }
 
-
 fn get_metadata_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, OpenTelemetryError> {
-     let project_id = if let Some(serde_json::Value::String(project_id)) = get_val::get_val(metadata, &["project", "projectId"], None) {
+    let project_id = if let Some(serde_json::Value::String(project_id)) = get_val::get_val(metadata, &["project", "projectId"], None) {
         project_id
-     } else {
+    } else {
         Err(OpenTelemetryError::new("project id not found"))?
-     };
-     let zone = if let Some(serde_json::Value::String(zone)) = get_val::get_val(metadata, &["instance", "zone"], None) {
+    };
+    let zone = if let Some(serde_json::Value::String(zone)) = get_val::get_val(metadata, &["instance", "zone"], None) {
         zone
-     } else {
+    } else {
         Err(OpenTelemetryError::new("zone not found"))?
-     };
-    let attrs = vec![
-        KeyValue::new("cloud.account.id", project_id.clone()),
-        KeyValue::new("cloud.provider", "gcp"),
-    ];
+    };
+    let attrs = vec![KeyValue::new("cloud.account.id", project_id.clone()), KeyValue::new("cloud.provider", "gcp")];
     Ok(attrs)
 }
 
-
 /// Resource finder for common GCE attributes
-/// 
+///
 /// See: https://cloud.google.com/compute/docs/storing-retrieving-metadata
 fn get_gce_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, OpenTelemetryError> {
-
     let mut attrs = get_metadata_resources(metadata)?;
     let host_id = if let Some(serde_json::Value::String(host_id)) = get_val::get_val(metadata, &["instance", "id"], None) {
         host_id.clone()
@@ -107,7 +101,6 @@ fn get_gce_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, Open
     } else {
         Err(OpenTelemetryError::new("not gce resources"))?
     };
-    
     attrs.push(KeyValue::new("cloud.platform", "gcp_compute_engine"));
     attrs.push(KeyValue::new("cloud.availability_zone", zone_and_region.zone));
     attrs.push(KeyValue::new("cloud.region", zone_and_region.region));
@@ -123,12 +116,10 @@ fn get_gke_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, Open
         Err(OpenTelemetryError::new("KUBERNETES_SERVICE_HOST not found"))?
     }
 
-
     let mut attrs = get_metadata_resources(metadata)?;
     if let Ok(container_name) = env::var("CONTAINER_NAME") {
         attrs.push(KeyValue::new("container.name", container_name));
     }
-
 
     let pod_namespace = if let Ok(pod_namespace) = env::var("NAMESPACE") {
         pod_namespace
@@ -200,9 +191,7 @@ fn get_gke_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, Open
     attrs.push(KeyValue::new("cloud.platform", "gcp_kubernetes_engine"));
 
     Ok(attrs)
-    
 }
-
 
 /// Resource finder for Cloud Run attributes
 fn get_cloudrun_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, OpenTelemetryError> {
@@ -253,7 +242,6 @@ fn get_cloudrun_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>,
     Ok(attrs)
 }
 
-
 /// Resource finder for Cloud Functions attributes
 fn get_cloudfunctions_resources(metadata: &serde_json::Value) -> Result<Vec<KeyValue>, OpenTelemetryError> {
     if env::var("FUNCTION_TARGET").is_err() {
@@ -303,7 +291,6 @@ fn get_cloudfunctions_resources(metadata: &serde_json::Value) -> Result<Vec<KeyV
     Ok(attrs)
 }
 
-
 pub struct GoogleCloudResourceDetector {
     attrs: Arc<Vec<KeyValue>>,
 }
@@ -314,9 +301,7 @@ impl GoogleCloudResourceDetector {
             Ok(metadata) => metadata,
             Err(e) => {
                 warn!("Failed to get metadata: {:?}", e);
-                return Self {
-                    attrs: Arc::new(vec![]),
-                };
+                return Self { attrs: Arc::new(vec![]) };
             }
         };
 
@@ -334,23 +319,18 @@ impl GoogleCloudResourceDetector {
             kv
         } else {
             warn!("No resource found");
-            return Self {
-                attrs: Arc::new(vec![]),
-            };
+            return Self { attrs: Arc::new(vec![]) };
         };
-        Self {
-            attrs: Arc::new(attrs),
-        }
+        Self { attrs: Arc::new(attrs) }
     }
 
     pub fn get_resource(&self) -> Resource {
-        Resource::new(self.attrs.as_ref().clone())
+        Resource::builder_empty().with_attributes(self.attrs.as_ref().clone()).build()
     }
 }
 
 impl ResourceDetector for GoogleCloudResourceDetector {
-    fn detect(&self, timeout: Duration) -> Resource {
+    fn detect(&self) -> Resource {
         self.get_resource()
     }
 }
-

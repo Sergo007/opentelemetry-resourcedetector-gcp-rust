@@ -1,11 +1,9 @@
-
 use crate::error::OpenTelemetryError;
+use once_cell::sync::Lazy;
 use opentelemetry::KeyValue;
 use opentelemetry_sdk::Resource;
-use once_cell::sync::Lazy;
 use std::sync::Mutex;
 static THE_RESOURCE: Lazy<Mutex<()>> = Lazy::new(Mutex::default);
-
 
 #[cfg(test)]
 mod gce_gke_tests {
@@ -13,10 +11,9 @@ mod gce_gke_tests {
     use super::*;
     use once_cell::sync::Lazy;
     // use pretty_assertions::{assert_eq, assert_ne};
+    use crate::{get_gce_resources, get_gke_resources, test_envs::TestEnvs};
     use pretty_assertions_sorted::{assert_eq, assert_eq_sorted};
     use regex::Regex;
-    use crate::{get_gce_resources, get_gke_resources, test_envs::TestEnvs};
-
 
     #[test]
     fn test_get_gce_resources() {
@@ -30,32 +27,34 @@ mod gce_gke_tests {
             },
         });
         let resources = get_gce_resources(&metadata).unwrap();
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "fakeProject".to_string()),
-            KeyValue::new("cloud.availability_zone", "us-east4-b".to_string()),
-            KeyValue::new("cloud.platform", "gcp_compute_engine"),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.region", "us-east4".to_string()),
-            KeyValue::new("host.id", "fakeId".to_string()),
-            KeyValue::new("host.name", "fakeName".to_string()),
-            KeyValue::new("host.type", "fakeMachineType".to_string()),
-            // KeyValue::new("service.name", "unknown_service"),
-            // KeyValue::new("telemetry.sdk.language", "rust"),
-            // KeyValue::new("telemetry.sdk.name", "opentelemetry"),
-            // KeyValue::new("telemetry.sdk.version", "0.23.0"),
-        ]);
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "fakeProject".to_string()),
+                KeyValue::new("cloud.availability_zone", "us-east4-b".to_string()),
+                KeyValue::new("cloud.platform", "gcp_compute_engine"),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.region", "us-east4".to_string()),
+                KeyValue::new("host.id", "fakeId".to_string()),
+                KeyValue::new("host.name", "fakeName".to_string()),
+                KeyValue::new("host.type", "fakeMachineType".to_string()),
+                // KeyValue::new("service.name", "unknown_service"),
+                // KeyValue::new("telemetry.sdk.language", "rust"),
+                // KeyValue::new("telemetry.sdk.name", "opentelemetry"),
+                // KeyValue::new("telemetry.sdk.version", "0.23.0"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_get_gke_resources_regional() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","POD_NAME","HOSTNAME","NAMESPACE"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "POD_NAME", "HOSTNAME", "NAMESPACE"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::set_var("NAMESPACE", "namespace");
@@ -75,31 +74,33 @@ mod gce_gke_tests {
             });
             get_gke_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "namespace".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "pod_name".to_string()),
-            KeyValue::new("cloud.region", "us-east4".to_string()),
-            KeyValue::new("cloud.zone", "us-east4-b".to_string()),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "namespace".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "pod_name".to_string()),
+                KeyValue::new("cloud.region", "us-east4".to_string()),
+                KeyValue::new("cloud.zone", "us-east4-b".to_string()),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_get_gke_resources_zone() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","POD_NAME","HOSTNAME","NAMESPACE"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "POD_NAME", "HOSTNAME", "NAMESPACE"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::set_var("NAMESPACE", "namespace");
@@ -119,23 +120,25 @@ mod gce_gke_tests {
             });
             get_gke_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "namespace".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "pod_name".to_string()),
-            KeyValue::new("cloud.availability_zone", "us-east4-b".to_string()),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.zone", "us-east4-b".to_string()),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "namespace".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "pod_name".to_string()),
+                KeyValue::new("cloud.availability_zone", "us-east4-b".to_string()),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.zone", "us-east4-b".to_string()),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 }
@@ -265,10 +268,10 @@ mod gke_tests {
     use super::*;
     use once_cell::sync::Lazy;
     // use pretty_assertions::{assert_eq, assert_ne};
+    use crate::{get_gke_resources, test_envs::TestEnvs};
     use pretty_assertions_sorted::{assert_eq, assert_eq_sorted};
     use regex::Regex;
-    use crate::{get_gke_resources, test_envs::TestEnvs};
-    
+
     static GKE_RESOURCES_JSON_STRING: Lazy<serde_json::Value> = Lazy::new(|| {
         serde_json::json!({
             "instance": {
@@ -291,9 +294,9 @@ mod gke_tests {
 
     #[test]
     fn test_missing_container_name() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","CONTAINER_NAME"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "CONTAINER_NAME"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::remove_var("CONTAINER_NAME");
@@ -301,30 +304,32 @@ mod gke_tests {
             let metadata = GKE_RESOURCES_JSON_STRING.clone();
             get_gke_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_environment_empty_strings() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","CONTAINER_NAME", "NAMESPACE"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "CONTAINER_NAME", "NAMESPACE"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::set_var("CONTAINER_NAME", "");
@@ -333,31 +338,33 @@ mod gke_tests {
             let metadata = GKE_RESOURCES_JSON_STRING.clone();
             get_gke_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "".to_string()),
-            KeyValue::new("container.name", "".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "".to_string()),
+                KeyValue::new("container.name", "".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_missing_namespace_file() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","CONTAINER_NAME", "NAMESPACE"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "CONTAINER_NAME", "NAMESPACE"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::set_var("CONTAINER_NAME", "container_name");
@@ -365,23 +372,25 @@ mod gke_tests {
             let metadata = GKE_RESOURCES_JSON_STRING.clone();
             get_gke_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "".to_string()),
-            KeyValue::new("container.name", "container_name".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "".to_string()),
+                KeyValue::new("container.name", "container_name".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
@@ -393,13 +402,13 @@ mod gke_tests {
         let file_path = dir_path.join("namespace");
 
         fs::create_dir_all(dir_path).unwrap();
-    
+
         // Create and write to the file
         let mut file = fs::File::create(file_path).unwrap();
         file.write_all(b"namespace").unwrap();
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","CONTAINER_NAME", "NAMESPACE"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "CONTAINER_NAME", "NAMESPACE"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::set_var("CONTAINER_NAME", "container_name");
@@ -408,31 +417,33 @@ mod gke_tests {
             get_gke_resources(&metadata).unwrap()
         };
         fs::remove_file("/var/run/secrets/kubernetes.io/serviceaccount/namespace").unwrap();
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "namespace".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "".to_string()),
-            KeyValue::new("container.name", "container_name".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "namespace".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "".to_string()),
+                KeyValue::new("container.name", "container_name".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_finding_gke_resources() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","CONTAINER_NAME", "NAMESPACE", "HOSTNAME"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "CONTAINER_NAME", "NAMESPACE", "HOSTNAME"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::set_var("NAMESPACE", "namespace");
@@ -442,31 +453,33 @@ mod gke_tests {
             let metadata = GKE_RESOURCES_JSON_STRING.clone();
             get_gke_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "namespace".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "host_name".to_string()),
-            KeyValue::new("container.name", "container_name".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "namespace".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "host_name".to_string()),
+                KeyValue::new("container.name", "container_name".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_finding_gke_resources_with_pod_name() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST","CONTAINER_NAME", "NAMESPACE", "HOSTNAME", "POD_NAME"]);
+            let _e = TestEnvs::new(vec!["KUBERNETES_SERVICE_HOST", "CONTAINER_NAME", "NAMESPACE", "HOSTNAME", "POD_NAME"]);
 
             TestEnvs::set_var("KUBERNETES_SERVICE_HOST", "10.0.0.1");
             TestEnvs::set_var("NAMESPACE", "namespace");
@@ -477,26 +490,27 @@ mod gke_tests {
             let metadata = GKE_RESOURCES_JSON_STRING.clone();
             get_gke_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
-            KeyValue::new("k8s.namespace.name", "namespace".to_string()),
-            KeyValue::new("host.id", "instance_id".to_string()),
-            KeyValue::new("k8s.pod.name", "pod_name".to_string()),
-            KeyValue::new("container.name", "container_name".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
-            KeyValue::new("gcp.resource_type", "gke_container"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("k8s.cluster.name", "cluster_name".to_string()),
+                KeyValue::new("k8s.namespace.name", "namespace".to_string()),
+                KeyValue::new("host.id", "instance_id".to_string()),
+                KeyValue::new("k8s.pod.name", "pod_name".to_string()),
+                KeyValue::new("container.name", "container_name".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("cloud.platform", "gcp_kubernetes_engine"),
+                KeyValue::new("gcp.resource_type", "gke_container"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
-
 }
 
 #[cfg(test)]
@@ -505,10 +519,10 @@ mod cloudfunctions_tests {
     use super::*;
     use once_cell::sync::Lazy;
     // use pretty_assertions::{assert_eq, assert_ne};
+    use crate::{get_cloudfunctions_resources, get_cloudrun_resources, test_envs::TestEnvs};
     use pretty_assertions_sorted::{assert_eq, assert_eq_sorted};
     use regex::Regex;
-    use crate::{get_cloudfunctions_resources, get_cloudrun_resources, test_envs::TestEnvs};
-    
+
     static CLOUDFUNCTIONS_RESOURCES_JSON_STRING: Lazy<serde_json::Value> = Lazy::new(|| {
         serde_json::json!({
             "instance": {
@@ -530,9 +544,9 @@ mod cloudfunctions_tests {
 
     #[test]
     fn test_missing_service_name() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["FUNCTION_TARGET","K_SERVICE","K_REVISION"]);
+            let _e = TestEnvs::new(vec!["FUNCTION_TARGET", "K_SERVICE", "K_REVISION"]);
 
             TestEnvs::set_var("FUNCTION_TARGET", "function");
             TestEnvs::remove_var("K_SERVICE");
@@ -541,87 +555,92 @@ mod cloudfunctions_tests {
             let metadata = CLOUDFUNCTIONS_RESOURCES_JSON_STRING.clone();
             get_cloudfunctions_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("cloud.platform", "gcp_cloud_functions"),
-            KeyValue::new("cloud.region", "region".to_string()),
-            KeyValue::new("faas.instance", "instance_id".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("gcp.resource_type", "cloud_functions"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("cloud.platform", "gcp_cloud_functions"),
+                KeyValue::new("cloud.region", "region".to_string()),
+                KeyValue::new("faas.instance", "instance_id".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("gcp.resource_type", "cloud_functions"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_environment_empty_strings() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["FUNCTION_TARGET","K_SERVICE","K_REVISION"]);
+            let _e = TestEnvs::new(vec!["FUNCTION_TARGET", "K_SERVICE", "K_REVISION"]);
 
             TestEnvs::set_var("FUNCTION_TARGET", "function");
-            TestEnvs::set_var("K_SERVICE","");
-            TestEnvs::set_var("K_REVISION","");
+            TestEnvs::set_var("K_SERVICE", "");
+            TestEnvs::set_var("K_REVISION", "");
 
             let metadata = CLOUDFUNCTIONS_RESOURCES_JSON_STRING.clone();
             get_cloudfunctions_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("cloud.platform", "gcp_cloud_functions"),
-            KeyValue::new("cloud.region", "region".to_string()),
-            KeyValue::new("faas.instance", "instance_id".to_string()),
-            KeyValue::new("faas.name", "".to_string()),
-            KeyValue::new("faas.version", "".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("gcp.resource_type", "cloud_functions"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("cloud.platform", "gcp_cloud_functions"),
+                KeyValue::new("cloud.region", "region".to_string()),
+                KeyValue::new("faas.instance", "instance_id".to_string()),
+                KeyValue::new("faas.name", "".to_string()),
+                KeyValue::new("faas.version", "".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("gcp.resource_type", "cloud_functions"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
 
     #[test]
     fn test_finding_cloudfunctions_resources() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["FUNCTION_TARGET","K_SERVICE","K_REVISION"]);
+            let _e = TestEnvs::new(vec!["FUNCTION_TARGET", "K_SERVICE", "K_REVISION"]);
 
             TestEnvs::set_var("FUNCTION_TARGET", "function");
-            TestEnvs::set_var("K_SERVICE","service");
-            TestEnvs::set_var("K_REVISION","revision");
+            TestEnvs::set_var("K_SERVICE", "service");
+            TestEnvs::set_var("K_REVISION", "revision");
 
             let metadata = CLOUDFUNCTIONS_RESOURCES_JSON_STRING.clone();
             get_cloudfunctions_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("cloud.platform", "gcp_cloud_functions"),
-            KeyValue::new("cloud.region", "region".to_string()),
-            KeyValue::new("faas.instance", "instance_id".to_string()),
-            KeyValue::new("faas.name", "service".to_string()),
-            KeyValue::new("faas.version", "revision".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("gcp.resource_type", "cloud_functions"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("cloud.platform", "gcp_cloud_functions"),
+                KeyValue::new("cloud.region", "region".to_string()),
+                KeyValue::new("faas.instance", "instance_id".to_string()),
+                KeyValue::new("faas.name", "service".to_string()),
+                KeyValue::new("faas.version", "revision".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("gcp.resource_type", "cloud_functions"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
     }
-
 }
 
 #[cfg(test)]
@@ -630,9 +649,9 @@ mod cloudrun_tests {
     use super::*;
     use once_cell::sync::Lazy;
     // use pretty_assertions::{assert_eq, assert_ne};
+    use crate::{get_cloudrun_resources, test_envs::TestEnvs};
     use pretty_assertions_sorted::{assert_eq, assert_eq_sorted};
     use regex::Regex;
-    use crate::{get_cloudrun_resources, test_envs::TestEnvs};
     static CLOUDRUN_RESOURCES_JSON_STRING: Lazy<serde_json::Value> = Lazy::new(|| {
         serde_json::json!({
             "instance": {
@@ -654,9 +673,9 @@ mod cloudrun_tests {
 
     #[test]
     fn test_missing_service_name() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["K_CONFIGURATION","K_SERVICE","K_REVISION"]);
+            let _e = TestEnvs::new(vec!["K_CONFIGURATION", "K_SERVICE", "K_REVISION"]);
 
             TestEnvs::set_var("K_CONFIGURATION", "cloudrun_config");
             TestEnvs::remove_var("K_SERVICE");
@@ -665,29 +684,30 @@ mod cloudrun_tests {
             let metadata = CLOUDRUN_RESOURCES_JSON_STRING.clone();
             get_cloudrun_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("cloud.platform", "gcp_cloud_run"),
-            KeyValue::new("cloud.region", "region".to_string()),
-            KeyValue::new("faas.instance", "instance_id".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("gcp.resource_type", "cloud_run"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("cloud.platform", "gcp_cloud_run"),
+                KeyValue::new("cloud.region", "region".to_string()),
+                KeyValue::new("faas.instance", "instance_id".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("gcp.resource_type", "cloud_run"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
-        
     }
 
     #[test]
     fn test_environment_empty_strings() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["K_CONFIGURATION","K_SERVICE","K_REVISION"]);
+            let _e = TestEnvs::new(vec!["K_CONFIGURATION", "K_SERVICE", "K_REVISION"]);
 
             TestEnvs::set_var("K_CONFIGURATION", "cloudrun_config");
             TestEnvs::set_var("K_SERVICE", "");
@@ -696,31 +716,32 @@ mod cloudrun_tests {
             let metadata = CLOUDRUN_RESOURCES_JSON_STRING.clone();
             get_cloudrun_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("cloud.platform", "gcp_cloud_run"),
-            KeyValue::new("cloud.region", "region".to_string()),
-            KeyValue::new("faas.instance", "instance_id".to_string()),
-            KeyValue::new("faas.name", "".to_string()),
-            KeyValue::new("faas.version", "".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("gcp.resource_type", "cloud_run"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("cloud.platform", "gcp_cloud_run"),
+                KeyValue::new("cloud.region", "region".to_string()),
+                KeyValue::new("faas.instance", "instance_id".to_string()),
+                KeyValue::new("faas.name", "".to_string()),
+                KeyValue::new("faas.version", "".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("gcp.resource_type", "cloud_run"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
-        
     }
 
     #[test]
     fn test_finding_cloudrun_resources() {
-        let resources = {  
+        let resources = {
             let _m = THE_RESOURCE.lock().unwrap();
-            let _e = TestEnvs::new(vec!["K_CONFIGURATION","K_SERVICE","K_REVISION"]);
+            let _e = TestEnvs::new(vec!["K_CONFIGURATION", "K_SERVICE", "K_REVISION"]);
 
             TestEnvs::set_var("K_CONFIGURATION", "cloudrun_config");
             TestEnvs::set_var("K_SERVICE", "service");
@@ -729,24 +750,24 @@ mod cloudrun_tests {
             let metadata = CLOUDRUN_RESOURCES_JSON_STRING.clone();
             get_cloudrun_resources(&metadata).unwrap()
         };
-        let res_default = Resource::default();
-        let res = Resource::new(resources);
+        // let res_default = Resource::default();
+        let res = Resource::builder_empty().with_attributes(resources).build();
         // let res = res.merge(&res_default);
         // res.iter().for_each(|kv| println!("{:?} : {:?}", kv.0, kv.1));
-        
-        let res_sould_be = Resource::new(vec![
-            KeyValue::new("cloud.account.id", "project_id".to_string()),
-            KeyValue::new("cloud.platform", "gcp_cloud_run"),
-            KeyValue::new("cloud.region", "region".to_string()),
-            KeyValue::new("faas.instance", "instance_id".to_string()),
-            KeyValue::new("faas.name", "service".to_string()),
-            KeyValue::new("faas.version", "revision".to_string()),
-            KeyValue::new("cloud.zone", "zone".to_string()),
-            KeyValue::new("cloud.provider", "gcp"),
-            KeyValue::new("gcp.resource_type", "cloud_run"),
-        ]);
+
+        let res_sould_be = Resource::builder_empty()
+            .with_attributes(vec![
+                KeyValue::new("cloud.account.id", "project_id".to_string()),
+                KeyValue::new("cloud.platform", "gcp_cloud_run"),
+                KeyValue::new("cloud.region", "region".to_string()),
+                KeyValue::new("faas.instance", "instance_id".to_string()),
+                KeyValue::new("faas.name", "service".to_string()),
+                KeyValue::new("faas.version", "revision".to_string()),
+                KeyValue::new("cloud.zone", "zone".to_string()),
+                KeyValue::new("cloud.provider", "gcp"),
+                KeyValue::new("gcp.resource_type", "cloud_run"),
+            ])
+            .build();
         assert_eq_sorted!(res, res_sould_be);
-        
     }
 }
-        
