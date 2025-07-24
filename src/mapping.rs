@@ -1,6 +1,6 @@
-use std::{collections::HashMap, fmt::format};
 use once_cell::sync::Lazy;
 use opentelemetry_sdk::Resource;
+use std::{collections::HashMap, fmt::format};
 use tracing::Value;
 
 use crate::constants::{self, ResourceAttributes};
@@ -14,12 +14,9 @@ struct MapConfig<'a> {
     pub fallback: &'a str,
 }
 
-impl <'a>MapConfig<'a> {
+impl<'a> MapConfig<'a> {
     pub fn new(otel_keys: Vec<&'a str>) -> Self {
-        Self {
-            otel_keys,
-            fallback: "",
-        }
+        Self { otel_keys, fallback: "" }
     }
 }
 
@@ -31,122 +28,50 @@ static MAPPINFS: Lazy<HashMap<&str, HashMap<&str, MapConfig>>> = Lazy::new(|| {
         (
             constants::GCE_INSTANCE,
             HashMap::from([
-                (
-                    constants::ZONE,
-                    MapConfig::new(vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE]),
-                ),
-                (
-                    constants::INSTANCE_ID,
-                    MapConfig::new(vec![ResourceAttributes::HOST_ID]),
-                ),
+                (constants::ZONE, MapConfig::new(vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE])),
+                (constants::INSTANCE_ID, MapConfig::new(vec![ResourceAttributes::HOST_ID])),
             ]),
         ),
         (
             constants::K8S_CONTAINER,
             HashMap::from([
-                (
-                    constants::LOCATION,
-                    MapConfig::new(vec![
-                        ResourceAttributes::CLOUD_AVAILABILITY_ZONE, 
-                        ResourceAttributes::CLOUD_REGION
-                    ]),
-                ),
-                (
-                    constants::CLUSTER_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME]),
-                ),
-                (
-                    constants::NAMESPACE_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_NAMESPACE_NAME]),
-                ),
-                (
-                    constants::POD_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_POD_NAME]),
-                ),
-                (
-                    constants::CONTAINER_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_CONTAINER_NAME]),
-                ),
+                (constants::LOCATION, MapConfig::new(vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE, ResourceAttributes::CLOUD_REGION])),
+                (constants::CLUSTER_NAME, MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME])),
+                (constants::NAMESPACE_NAME, MapConfig::new(vec![ResourceAttributes::K8S_NAMESPACE_NAME])),
+                (constants::POD_NAME, MapConfig::new(vec![ResourceAttributes::K8S_POD_NAME])),
+                (constants::CONTAINER_NAME, MapConfig::new(vec![ResourceAttributes::K8S_CONTAINER_NAME])),
             ]),
         ),
         (
             constants::K8S_POD,
             HashMap::from([
-                (
-                    constants::LOCATION,
-                    MapConfig::new(vec![
-                        ResourceAttributes::CLOUD_AVAILABILITY_ZONE, 
-                        ResourceAttributes::CLOUD_REGION
-                    ]),
-                ),
-                (
-                    constants::CLUSTER_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME]),
-                ),
-                (
-                    constants::NAMESPACE_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_NAMESPACE_NAME]),
-                ),
-                (
-                    constants::POD_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_POD_NAME]),
-                ),
+                (constants::LOCATION, MapConfig::new(vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE, ResourceAttributes::CLOUD_REGION])),
+                (constants::CLUSTER_NAME, MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME])),
+                (constants::NAMESPACE_NAME, MapConfig::new(vec![ResourceAttributes::K8S_NAMESPACE_NAME])),
+                (constants::POD_NAME, MapConfig::new(vec![ResourceAttributes::K8S_POD_NAME])),
             ]),
         ),
         (
             constants::K8S_NODE,
             HashMap::from([
-                (
-                    constants::LOCATION,
-                    MapConfig::new(vec![
-                        ResourceAttributes::CLOUD_AVAILABILITY_ZONE, 
-                        ResourceAttributes::CLOUD_REGION
-                    ]),
-                ),
-                (
-                    constants::CLUSTER_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME]),
-                ),
-                (
-                    constants::NODE_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_NODE_NAME]),
-                ),
+                (constants::LOCATION, MapConfig::new(vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE, ResourceAttributes::CLOUD_REGION])),
+                (constants::CLUSTER_NAME, MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME])),
+                (constants::NODE_NAME, MapConfig::new(vec![ResourceAttributes::K8S_NODE_NAME])),
             ]),
         ),
         (
             constants::K8S_CLUSTER,
             HashMap::from([
-                (
-                    constants::LOCATION,
-                    MapConfig::new(vec![
-                        ResourceAttributes::CLOUD_AVAILABILITY_ZONE, 
-                        ResourceAttributes::CLOUD_REGION
-                    ]),
-                ),
-                (
-                    constants::CLUSTER_NAME,
-                    MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME]),
-                ),
+                (constants::LOCATION, MapConfig::new(vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE, ResourceAttributes::CLOUD_REGION])),
+                (constants::CLUSTER_NAME, MapConfig::new(vec![ResourceAttributes::K8S_CLUSTER_NAME])),
             ]),
         ),
         (
             constants::AWS_EC2_INSTANCE,
             HashMap::from([
-                (
-                    constants::INSTANCE_ID,
-                    MapConfig::new(vec![ResourceAttributes::HOST_ID]),
-                ),
-                (
-                    constants::REGION,
-                    MapConfig::new(vec![
-                        ResourceAttributes::CLOUD_AVAILABILITY_ZONE, 
-                        ResourceAttributes::CLOUD_REGION
-                    ]),
-                ),
-                (
-                    constants::AWS_ACCOUNT,
-                    MapConfig::new(vec![ResourceAttributes::CLOUD_ACCOUNT_ID]),
-                ),
+                (constants::INSTANCE_ID, MapConfig::new(vec![ResourceAttributes::HOST_ID])),
+                (constants::REGION, MapConfig::new(vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE, ResourceAttributes::CLOUD_REGION])),
+                (constants::AWS_ACCOUNT, MapConfig::new(vec![ResourceAttributes::CLOUD_ACCOUNT_ID])),
             ]),
         ),
         (
@@ -155,33 +80,13 @@ static MAPPINFS: Lazy<HashMap<&str, HashMap<&str, MapConfig>>> = Lazy::new(|| {
                 (
                     constants::LOCATION,
                     MapConfig {
-                        otel_keys: vec![
-                            ResourceAttributes::CLOUD_AVAILABILITY_ZONE,
-                            ResourceAttributes::CLOUD_REGION,
-                        ],
+                        otel_keys: vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE, ResourceAttributes::CLOUD_REGION],
                         fallback: "global",
                     },
                 ),
-                (
-                    constants::NAMESPACE,
-                    MapConfig::new(vec![
-                        ResourceAttributes::SERVICE_NAMESPACE,
-                    ]),
-                ),
-                (
-                    constants::JOB,
-                    MapConfig::new(vec![
-                        ResourceAttributes::SERVICE_NAME,
-                        ResourceAttributes::FAAS_NAME,
-                    ]),
-                ),
-                (
-                    constants::TASK_ID,
-                    MapConfig::new(vec![
-                        ResourceAttributes::SERVICE_INSTANCE_ID,
-                        ResourceAttributes::FAAS_INSTANCE,
-                    ]),
-                ),
+                (constants::NAMESPACE, MapConfig::new(vec![ResourceAttributes::SERVICE_NAMESPACE])),
+                (constants::JOB, MapConfig::new(vec![ResourceAttributes::SERVICE_NAME, ResourceAttributes::FAAS_NAME])),
+                (constants::TASK_ID, MapConfig::new(vec![ResourceAttributes::SERVICE_INSTANCE_ID, ResourceAttributes::FAAS_INSTANCE])),
             ]),
         ),
         (
@@ -190,29 +95,16 @@ static MAPPINFS: Lazy<HashMap<&str, HashMap<&str, MapConfig>>> = Lazy::new(|| {
                 (
                     constants::LOCATION,
                     MapConfig {
-                        otel_keys: vec![
-                            ResourceAttributes::CLOUD_AVAILABILITY_ZONE,
-                            ResourceAttributes::CLOUD_REGION,
-                        ],
+                        otel_keys: vec![ResourceAttributes::CLOUD_AVAILABILITY_ZONE, ResourceAttributes::CLOUD_REGION],
                         fallback: "global",
                     },
                 ),
-                (
-                    constants::NAMESPACE,
-                    MapConfig::new(vec![ResourceAttributes::SERVICE_NAMESPACE]),
-                ),
-                (
-                    constants::NODE_ID,
-                    MapConfig::new(vec![
-                        ResourceAttributes::HOST_ID,
-                        ResourceAttributes::HOST_NAME,
-                    ]),
-                ),
+                (constants::NAMESPACE, MapConfig::new(vec![ResourceAttributes::SERVICE_NAMESPACE])),
+                (constants::NODE_ID, MapConfig::new(vec![ResourceAttributes::HOST_ID, ResourceAttributes::HOST_NAME])),
             ]),
         ),
     ])
 });
-
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MonitoredResourceData {
@@ -220,10 +112,7 @@ pub struct MonitoredResourceData {
     pub labels: HashMap<String, String>,
 }
 
-fn create_monitored_resource(
-    monitored_resource_type: &str, 
-    resource_attrs: HashMap<String, opentelemetry::Value>
-) -> MonitoredResourceData {
+fn create_monitored_resource(monitored_resource_type: &str, resource_attrs: HashMap<String, opentelemetry::Value>) -> MonitoredResourceData {
     let mapping = MAPPINFS.get(monitored_resource_type).unwrap();
     let mut labels = HashMap::new();
 
@@ -249,7 +138,6 @@ fn create_monitored_resource(
             None => opentelemetry::Value::String(map_config.fallback.into()),
         };
 
-
         // OTel attribute values can be any of str, bool, int, float, or Sequence of any of
         // them. Encode any non-strings as json string
         let mr_value_str: String = match mr_value {
@@ -266,29 +154,21 @@ fn create_monitored_resource(
     }
 }
 
-
-
 /// Add Google resource specific information (e.g. instance id, region).
-/// 
+///
 /// See
 /// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom-metric-resources
 /// for supported types
 /// Args:
 ///         resource: OTel resource
-/// 
-pub fn get_monitored_resource(
-    resource: Resource,
-) -> Option<MonitoredResourceData> {
-    let res_atters = resource.iter().map(|(k,v)| {
-        (k.to_string(), v.clone())
-    });
+///
+pub fn get_monitored_resource(resource: &Resource) -> Option<MonitoredResourceData> {
+    let res_atters = resource.iter().map(|(k, v)| (k.to_string(), v.clone()));
     let attrs: HashMap<String, opentelemetry::Value> = HashMap::from_iter(res_atters);
     let platform = attrs.get(ResourceAttributes::CLOUD_PLATFORM_KEY).map(|v| v.to_string());
     let platform = platform.as_ref().map(|v| v.as_str());
     let mr = match platform {
-        Some(ResourceAttributes::GCP_COMPUTE_ENGINE) => {
-            create_monitored_resource(constants::GCE_INSTANCE, attrs)
-        },
+        Some(ResourceAttributes::GCP_COMPUTE_ENGINE) => create_monitored_resource(constants::GCE_INSTANCE, attrs),
         Some(ResourceAttributes::GCP_KUBERNETES_ENGINE) => {
             if attrs.get(ResourceAttributes::K8S_CONTAINER_NAME).is_some() {
                 create_monitored_resource(constants::K8S_CONTAINER, attrs)
@@ -299,13 +179,13 @@ pub fn get_monitored_resource(
             } else {
                 create_monitored_resource(constants::K8S_CLUSTER, attrs)
             }
-        },
-        Some(ResourceAttributes::AWS_EC2) => {
-            create_monitored_resource(constants::AWS_EC2_INSTANCE, attrs)
-        },
+        }
+        Some(ResourceAttributes::AWS_EC2) => create_monitored_resource(constants::AWS_EC2_INSTANCE, attrs),
         _ => {
             // fallback to generic_task
-            if( attrs.get(ResourceAttributes::SERVICE_NAME).is_some() || attrs.get(ResourceAttributes::FAAS_NAME).is_some()) && (attrs.get(ResourceAttributes::SERVICE_INSTANCE_ID).is_some() || attrs.get(ResourceAttributes::FAAS_INSTANCE).is_some()) {
+            if (attrs.get(ResourceAttributes::SERVICE_NAME).is_some() || attrs.get(ResourceAttributes::FAAS_NAME).is_some())
+                && (attrs.get(ResourceAttributes::SERVICE_INSTANCE_ID).is_some() || attrs.get(ResourceAttributes::FAAS_INSTANCE).is_some())
+            {
                 create_monitored_resource(constants::GENERIC_TASK, attrs)
             } else {
                 create_monitored_resource(constants::GENERIC_NODE, attrs)

@@ -28,7 +28,7 @@ mod tests {
                 KeyValue::new("k8s.container.name", "mycontainer"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_container".to_string(),
@@ -55,7 +55,7 @@ mod tests {
                 KeyValue::new("k8s.container.name", "mycontainer"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_container".to_string(),
@@ -81,7 +81,7 @@ mod tests {
                 KeyValue::new("k8s.pod.name", "mypod"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_pod".to_string(),
@@ -106,7 +106,7 @@ mod tests {
                 KeyValue::new("k8s.pod.name", "mypod"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_pod".to_string(),
@@ -131,7 +131,7 @@ mod tests {
                 KeyValue::new("k8s.node.name", "mynode"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_node".to_string(),
@@ -155,7 +155,7 @@ mod tests {
                 KeyValue::new("k8s.node.name", "mynode"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_node".to_string(),
@@ -178,7 +178,7 @@ mod tests {
                 KeyValue::new("k8s.namespace.name", "myns"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_cluster".to_string(),
@@ -200,7 +200,7 @@ mod tests {
                 KeyValue::new("k8s.namespace.name", "myns"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "k8s_cluster".to_string(),
@@ -222,7 +222,7 @@ mod tests {
                 KeyValue::new("cloud.account.id", "myawsaccount"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "aws_ec2_instance".to_string(),
@@ -245,7 +245,7 @@ mod tests {
                 KeyValue::new("cloud.account.id", "myawsaccount"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "aws_ec2_instance".to_string(),
@@ -268,7 +268,7 @@ mod tests {
                 KeyValue::new("service.instance.id", "serviceinstanceid"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_task".to_string(),
@@ -292,7 +292,7 @@ mod tests {
                 KeyValue::new("service.instance.id", "serviceinstanceid"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_task".to_string(),
@@ -315,7 +315,7 @@ mod tests {
                 KeyValue::new("service.instance.id", "serviceinstanceid"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_task".to_string(),
@@ -340,7 +340,7 @@ mod tests {
                 KeyValue::new("faas.instance", "faasinstance"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_task".to_string(),
@@ -364,7 +364,7 @@ mod tests {
                 KeyValue::new("faas.instance", "faasinstance"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_task".to_string(),
@@ -388,7 +388,7 @@ mod tests {
                 KeyValue::new("host.id", "hostid"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_node".to_string(),
@@ -411,7 +411,7 @@ mod tests {
                 KeyValue::new("host.id", "hostid"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_node".to_string(),
@@ -433,7 +433,7 @@ mod tests {
                 KeyValue::new("host.id", "hostid"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_node".to_string(),
@@ -455,7 +455,7 @@ mod tests {
                 KeyValue::new("host.name", "hostname"),
             ])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_node".to_string(),
@@ -473,7 +473,7 @@ mod tests {
         let res = Resource::builder_empty()
             .with_attributes(vec![KeyValue::new("foo", "bar"), KeyValue::new("no.useful", "resourceattribs")])
             .build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_node".to_string(),
@@ -489,7 +489,7 @@ mod tests {
     #[test]
     fn test_get_monitored_resource_empty() {
         let res = Resource::builder_empty().with_attributes(vec![]).build();
-        let monitored_resource = get_monitored_resource(res);
+        let monitored_resource = get_monitored_resource(&res);
         assert!(monitored_resource.is_some());
         let export_monitored_resource = MonitoredResourceData {
             r#type: "generic_node".to_string(),
@@ -506,7 +506,7 @@ mod tests {
     fn test_non_string_values() {
         fn non_string_expect<V: Into<opentelemetry::Value>>(value: V, expect: Option<String>) {
             let res = Resource::builder_empty().with_attributes(vec![KeyValue::new("host.id", value)]).build();
-            let monitored_resource = get_monitored_resource(res);
+            let monitored_resource = get_monitored_resource(&res);
             assert!(monitored_resource.is_some());
             if let Some(monitored_resource) = monitored_resource {
                 assert_eq!(monitored_resource.labels.get("node_id"), expect.as_ref());
