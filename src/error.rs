@@ -9,9 +9,7 @@ impl OpenTelemetryError {
     where
         T: ToString,
     {
-        Self {
-            message: message.to_string(),
-        }
+        Self { message: message.to_string() }
     }
 }
 

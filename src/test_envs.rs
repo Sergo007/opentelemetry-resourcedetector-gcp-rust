@@ -37,10 +37,7 @@ impl TestEnvs {
             let value = Self::get_env(key);
             Self::remove_var(key);
 
-            let pair = Pair {
-                key: key.to_string(),
-                value,
-            };
+            let pair = Pair { key: key.to_string(), value };
             list.push(pair);
         }
         list

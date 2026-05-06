@@ -14,11 +14,7 @@ use serde_json::Value;
 /// let resp = get_val(&obj, &["foo", "0", "bar"], None);
 /// assert_eq!(resp, Some(&serde_json::Value::String("bazz".to_string())));
 /// ```
-pub fn get_val<'a>(
-    data: &'a Value,
-    keys: &[&str],
-    default: Option<&'a Value>,
-) -> Option<&'a Value> {
+pub(crate) fn get_val<'a>(data: &'a Value, keys: &[&str], default: Option<&'a Value>) -> Option<&'a Value> {
     if keys.is_empty() {
         return Some(data);
     }
@@ -72,11 +68,6 @@ mod tests {
         let result = get_val(&json, &["value", "content", "args", "text"], None);
         assert_eq!(result, Some(&serde_json::Value::String("hi".to_string())));
         let result = get_val(&json, &["value", "chat_id"], None);
-        assert_eq!(
-            result,
-            Some(&serde_json::Value::String(
-                "e942ca6d-cf39-4af9-b5e7-c3f9ef5b72ec".to_string()
-            ))
-        );
+        assert_eq!(result, Some(&serde_json::Value::String("e942ca6d-cf39-4af9-b5e7-c3f9ef5b72ec".to_string())));
     }
 }
